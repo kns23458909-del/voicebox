@@ -1,0 +1,31 @@
+from gtts import gTTS
+from pydub import AudioSegment, effects
+
+# === 1. Cargar la pista base ===
+base_audio = AudioSegment.from_file("Alacranes Musical - Por Tu Amor (Video Oficial)(M4A_128K).m4a", format="m4a")
+base_audio = base_audio[:30000]  # recorte a 30s
+base_audio = base_audio.fade_out(3000)  # fade out
+
+# === 2. Generar la voz con gTTS ===
+tts = gTTS("¡Zumba con Marizz!", lang="es")
+tts.save("voz.mp3")
+voz = AudioSegment.from_file("voz.mp3", format="mp3")
+
+# Normalizar volumen de la voz
+voz = effects.normalize(voz)
+
+# === 3. Aplicar eco ligero ===
+def add_echo(sound, delay=150, decay=0.5):
+    echo = sound - 6
+    combined = sound.overlay(echo, position=delay)
+    return combined
+
+voz_eco = add_echo(voz)
+
+# === 4. Insertar la voz en la pista base ===
+output = base_audio.overlay(voz_eco, position=4000)   # primer "¡Zumba con Marizz!" en segundo 4
+output = output.overlay(voz_eco, position=18000)      # segundo en segundo 18
+
+# === 5. Exportar a MP3 final ===
+output.export("cortinilla_zumba.mp3", format="mp3")
+print("✅ Cortinilla generada: cortinilla_zumba.mp3")
